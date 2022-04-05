@@ -1,4 +1,5 @@
 var { uuid } = require('uuidv4');
+var https = require('https');
 global.uuid=uuid;
 global.cookieParser = require('cookie-parser');
 global.jwt = require('jsonwebtoken');
@@ -16,6 +17,11 @@ global.passwordHash = require('password-hash');
 var {OAuth2Client} = require('google-auth-library');
 global.OAuth2Client=OAuth2Client;
 global.google_client = new global.OAuth2Client('530638225218-0bn200lkl8nqoionnv6ns2og60calf43.apps.googleusercontent.com'); 
+
+var privateKey  = fs.readFileSync('/etc/letsencrypt/live/grafeeky.com/privkey.pem', 'utf8');
+var certificate = fs.readFileSync('/etc/letsencrypt/live/grafeeky.com/cert.pem', 'utf8');
+var credentials = {key: privateKey, cert: certificate};
+
 global.transporter = global.nodemailer.createTransport({
 	host: 'smtp.zoho.com',
 	secure: true,
@@ -71,9 +77,8 @@ class Manager_Main{
 			if(get_picture_qurye.err){return res.end()}
 			var picture=get_picture_qurye.result||'home/icons/user3.svg';
 			res.json({err:false,result:picture})
-		})	
-
-		global.http_server.listen(80)
+		})
+		https.createServer(credentials, global.http_server).listen(443);
 	}
 
 	async load_data_file(){
